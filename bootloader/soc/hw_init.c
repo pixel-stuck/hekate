@@ -61,8 +61,16 @@ void _config_gpios()
 	PINMUX_AUX(PINMUX_AUX_UART2_TX) = 0;
 	PINMUX_AUX(PINMUX_AUX_UART3_TX) = 0;
 
-	PINMUX_AUX(PINMUX_AUX_GPIO_PE6) = PINMUX_INPUT_ENABLE;
-	PINMUX_AUX(PINMUX_AUX_GPIO_PH6) = PINMUX_INPUT_ENABLE;
+	// Set pull ups and enable inputs on joycon detect rails
+	PINMUX_AUX(PINMUX_AUX_GPIO_PE6) = PINMUX_INPUT_ENABLE | PINMUX_PULL_UP;
+	PINMUX_AUX(PINMUX_AUX_GPIO_PH6) = PINMUX_INPUT_ENABLE | PINMUX_PULL_UP;
+
+	// Set enable pin for joycon power supply to normal GPIO with output enabled
+	PINMUX_AUX(PINMUX_AUX_SATA_LED_ACTIVE) = 3;
+
+	// Set joycon charge pins to normal GPIO with output enabled
+	PINMUX_AUX(PINMUX_AUX_SPDIF_IN) = 1;
+	PINMUX_AUX(PINMUX_AUX_GPIO_PK3) = 2;
 
 #if !defined (DEBUG_UART_PORT) || DEBUG_UART_PORT != UART_B
 	gpio_config(GPIO_PORT_G, GPIO_PIN_0, GPIO_MODE_GPIO);
@@ -80,6 +88,19 @@ void _config_gpios()
 	pinmux_config_i2c(I2C_1);
 	pinmux_config_i2c(I2C_5);
 	pinmux_config_uart(UART_A);
+
+	// Configure GPIO A5 as output and write a 1 to enable joycon 5v rail 
+	gpio_config(GPIO_PORT_A, GPIO_PIN_5, GPIO_MODE_GPIO);
+	gpio_output_enable(GPIO_PORT_A, GPIO_PIN_5, GPIO_OUTPUT_ENABLE);
+	gpio_write(GPIO_PORT_A, GPIO_PIN_5, GPIO_HIGH);
+
+	// Enable joycon charge pin
+	gpio_config(GPIO_PORT_CC, GPIO_PIN_3, GPIO_MODE_GPIO);
+	gpio_config(GPIO_PORT_K, GPIO_PIN_3, GPIO_MODE_GPIO);
+	gpio_output_enable(GPIO_PORT_CC, GPIO_PIN_3, GPIO_OUTPUT_ENABLE);
+	gpio_output_enable(GPIO_PORT_K, GPIO_PIN_3, GPIO_OUTPUT_ENABLE);
+	gpio_write(GPIO_PORT_CC, GPIO_PIN_3, GPIO_HIGH);
+	gpio_write(GPIO_PORT_K, GPIO_PIN_3, GPIO_HIGH);
 
 	// Configure volume up/down as inputs.
 	gpio_config(GPIO_PORT_X, GPIO_PIN_6, GPIO_MODE_GPIO);
